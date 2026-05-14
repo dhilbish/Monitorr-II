@@ -7,36 +7,42 @@
 {%- set ram_class = stats.ram_percent | threshold((thr.ram_ok if thr else 75),(thr.ram_warn if thr else 90)) -%}
 {%- set ping_class = stats.ping_ms | threshold((thr.ping_ok if thr else 50),(thr.ping_warn if thr else 500)) -%}
 
-<div id="cpu" class="col-md-2 col-centered double-val-label">
-  <span class="{{ cpu_class }}">CPU</span>
-  <span>{{ stats.cpu_percent }}%</span>
-</div>
-
-<div id="ram" class="col-md-2 col-centered double-val-label">
-  <span class="{{ ram_class }}">RAM</span>
-  <span>{{ stats.ram_percent }}%</span>
-</div>
-
-<div id="uptime" class="col-md-2 col-centered double-val-label">
-  <span class="primary">uptime</span>
-  <span>{{ stats.uptime_label }}</span>
-</div>
-
-<div id="ping" class="col-md-2 col-centered double-val-label">
-  <span class="{{ ping_class }}">ping</span>
-  <span>{{ stats.ping_ms if stats.ping_ms is not none else '-' }} ms</span>
-</div>
-
-{%- for d in stats.drives -%}
-  <div id="hd{{ loop.index }}" class="col-md-2 col-centered double-val-label hd-badge">
-    {%- if d.state == 'error' -%}
-      <span class="danger" title="{{ d.message }}">HD {{ d.name }}</span>
-      <span title="{{ d.message }}"><i class="fa fa-fw fa-exclamation-triangle" style="color:red"></i></span>
-    {%- else -%}
-      {%- set hd_class = d.percent | threshold((thr.hd_ok if thr else 75),(thr.hd_warn if thr else 90)) -%}
-      <span class="{{ hd_class }}" title="{{ d.path }} — {{ '%.1f'|format(d.used_gb) }} / {{ '%.1f'|format(d.total_gb) }} GiB">HD {{ d.name }}</span>
-      <span title="{{ d.path }}">{{ '%.0f'|format(d.percent) }}%</span>
-    {%- endif -%}
+<div class="stats-row">
+  <div id="cpu" class="col-md-2 col-centered double-val-label">
+    <span class="{{ cpu_class }}">CPU</span>
+    <span>{{ stats.cpu_percent }}%</span>
   </div>
-{%- endfor -%}
+
+  <div id="ram" class="col-md-2 col-centered double-val-label">
+    <span class="{{ ram_class }}">RAM</span>
+    <span>{{ stats.ram_percent }}%</span>
+  </div>
+</div>
+
+<div class="stats-row">
+  <div id="uptime" class="col-md-2 col-centered double-val-label">
+    <span class="primary">uptime</span>
+    <span>{{ stats.uptime_label }}</span>
+  </div>
+
+  <div id="ping" class="col-md-2 col-centered double-val-label">
+    <span class="{{ ping_class }}">ping</span>
+    <span>{{ stats.ping_ms if stats.ping_ms is not none else '-' }} ms</span>
+  </div>
+</div>
+
+<div id="hd" class="col-md-2 col-centered hd-multi">
+  {%- for d in stats.drives -%}
+    <div class="hd-pair">
+      {%- if d.state == 'error' -%}
+        <span class="danger" title="{{ d.message }}"> HD {{ d.name }} </span>
+        <span title="{{ d.message }}"><i class="fa fa-fw fa-exclamation-triangle" style="color:red"></i></span>
+      {%- else -%}
+        {%- set hd_class = d.percent | threshold((thr.hd_ok if thr else 75),(thr.hd_warn if thr else 90)) -%}
+        <span class="{{ hd_class }}" title="{{ d.path }} — {{ '%.1f'|format(d.used_gb) }} / {{ '%.1f'|format(d.total_gb) }} GiB"> HD {{ d.name }} </span>
+        <span title="{{ d.path }}">{{ '%.0f'|format(d.percent) }}%</span>
+      {%- endif -%}
+    </div>
+  {%- endfor -%}
+</div>
 {%- endif -%}

@@ -27,30 +27,132 @@
     .auto-style1 { text-align: center; }
     #summary { margin-top: -2rem !important; }
     #header { margin-top: 2.5rem !important; }
-    #hd { grid-column: 1 / span 2; }
     #services { margin-bottom: 7rem; }
 
-    /* Override the original fixed 17rem two-column grid so badges flow nicely with N drives. */
+    /* Reverted to the ORIGINAL Monitorr header behavior: full-viewport-width
+       display:table with clock left / title center / stats right. The clock
+       and stats may visually extend beyond the Bootstrap icon container —
+       same as how the original Monitorr (port 32009) looks. */
+    #left, #right { vertical-align: top !important; }
+
+    /* Replace the original 17rem 2-col × 5-row grid with a fixed-width column:
+         row 1 = CPU/RAM/uptime/ping (single flex row, right-aligned)
+         row 2 = HD pills in a strict 3-column grid that grows vertically. */
+    /* #stats: fixed width sized for 2 × 5rem pills + .5rem gap + 1.5rem padding = ~12rem.
+       Never grows with content — extra drives add rows only. */
     #stats {
         display: flex !important;
-        flex-wrap: wrap;
-        justify-content: flex-end;
-        align-items: center;
-        gap: .35rem .5rem;
-        width: auto !important;
-        max-width: 36rem;
-        float: none !important;
-        margin-left: auto;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: .5rem !important;
+        width: 13.5rem !important;
+        max-width: 13.5rem !important;
+        box-sizing: border-box !important;
+        height: auto !important;
+        min-height: 8rem !important;
+        padding: .8rem 1rem !important;
         grid-template-columns: none !important;
         grid-template-rows: none !important;
+        grid-auto-flow: row !important;
     }
-    /* Each badge has a stable, non-stretching width so the row wraps cleanly. */
-    #stats > div {
+    .stats-row {
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: center;
+        align-items: center;
+        gap: .6rem;
+        width: 100%;
+    }
+    /* Uniform badge width — every pill is forced to the same size so the
+       VISIBLE colored pill matches across CPU / RAM / uptime / ping / HD.
+       ID-targeted selectors lock specificity over Bootstrap / main.css. */
+    #stats .stats-row > #cpu,
+    #stats .stats-row > #ram,
+    #stats .stats-row > #uptime,
+    #stats .stats-row > #ping,
+    #stats #hd .hd-pair {
+        box-sizing: border-box !important;
+        display: flex !important;
+        flex: 0 0 5rem !important;
+        width: 5rem !important;
+        min-width: 5rem !important;
+        max-width: 5rem !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        float: none !important;
+        justify-content: stretch !important;
+        align-items: stretch !important;
+    }
+    /* Inner label + value spans flex-fill the wrapper so the colored pill
+       is a uniform 5rem wide on every row. Label half = 3rem, value half = 2rem. */
+    #stats .stats-row > div > span,
+    #stats #hd .hd-pair > span {
+        flex: 1 1 0 !important;
+        min-width: 0 !important;
+        font-size: .6rem !important;
+        padding: .35rem .25rem !important;
+        line-height: 1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        text-align: center;
+        box-sizing: border-box;
+    }
+    #stats .stats-row > div > span:first-child,
+    #stats #hd .hd-pair > span:first-child {
+        flex: 0 0 3rem !important;
+    }
+    #stats .stats-row > div > span:nth-child(2),
+    #stats #hd .hd-pair > span:nth-child(2) {
+        flex: 0 0 2rem !important;
+    }
+
+    /* HD: exactly 3 pills per row, centered. Width is 100% of the fixed
+       17rem stats container, so the box never grows horizontally. */
+    #hd.hd-multi {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: .4rem;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        background: transparent !important;
+        float: none !important;
+    }
+    /* (width/flex for #hd .hd-pair handled by the unified rule above) */
+    #hd .hd-pair > span {
+        background-color: #656565;
+        font-size: .7rem;
+        font-weight: 400;
+        line-height: 1;
+        padding: .35rem .35rem;
+        color: #fff;
+        white-space: nowrap;
+        transition: .4s;
+    }
+    #hd .hd-pair > span:first-child {
+        flex: 1 1 auto;
+        border-top-left-radius: .25em;
+        border-bottom-left-radius: .25em;
+        text-align: center;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    #hd .hd-pair > span:nth-child(2) {
         flex: 0 0 auto;
-        max-width: none !important;
-        padding: .3rem .4rem;
+        border-top-right-radius: .25em;
+        border-bottom-right-radius: .25em;
+        min-width: 2rem;
+        text-align: right;
     }
-    .hd-badge > span { font-size: .75rem; }
+    #hd .hd-pair > span.success { background-color: #5cb85c; }
+    #hd .hd-pair > span.warning { background-color: #f0ad4e; }
+    #hd .hd-pair > span.danger  { background-color: #d9534f; }
     .pace .pace-activity {
         display: block; visibility: hidden; position: fixed;
         top: 40%; left: calc(50% - 13rem); width: 2rem; height: 2rem;
