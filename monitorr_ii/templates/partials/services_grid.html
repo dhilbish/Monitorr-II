@@ -1,0 +1,60 @@
+{# Replicates the DOM produced by assets/php/loop.php #}
+{%- set bp = base_path -%}
+{%- for r in results if r.state != "disabled" -%}
+    <div>
+        <div class="col-lg-4">
+            {%- if r.ping_ms is not none -%}
+                {%- if r.ping_ms < 50 -%}{% set pingid = 'pinggreen' -%}
+                {%- elif r.ping_ms < 500 -%}{% set pingid = 'pingyellow' -%}
+                {%- else -%}{% set pingid = 'pingred' -%}{%- endif %}
+                <div id="pingindicator">
+                    <div id="{{ pingid }}" class="pingcircle" title="Ping response time: {{ r.ping_ms }} ms"></div>
+                </div>
+            {%- endif %}
+
+            {%- set svc = (cfg.services | selectattr('title', 'equalto', r.title) | first) if cfg is defined else None -%}
+
+            {# Wrap-with-link only if state is up or unresponsive AND we know the link_url #}
+            {%- set link_target = '' -%}
+            {%- for s in cfg.services if cfg is defined and s.title == r.title -%}
+                {%- if s.show_link and s.link_url -%}{% set link_target = s.link_url %}{%- endif -%}
+            {%- endfor -%}
+
+            {%- if r.state == "down" -%}
+                <div class="servicetileoffline">
+                    <div id="serviceimg">
+                        <div class="offline"><img id="{{ r.title|lower }}-service-img"
+                             src="{{ bp }}/icons/{{ (cfg.services | selectattr('title','equalto',r.title) | map(attribute='icon') | first) or 'blank.png' }}"
+                             class="serviceimg imgoffline" alt="{{ r.title|lower }}"></div>
+                    </div>
+                    <div id="servicetitleoffline"><div>{{ r.title }}</div></div>
+                    <div class="btnoffline">Offline</div>
+                </div>
+            {%- else -%}
+                {%- set state_label = 'Online' if r.state == 'up' else 'Unresponsive' -%}
+                {%- set state_class = 'btnonline' if r.state == 'up' else 'btnunknown' -%}
+                {%- if link_target -%}
+                    <a class="servicetile" href="{{ link_target }}" target="_blank" style="display: block">
+                        <div id="serviceimg">
+                            <div><img id="{{ r.title|lower }}-service-img"
+                                 src="{{ bp }}/icons/{{ (cfg.services | selectattr('title','equalto',r.title) | map(attribute='icon') | first) or 'blank.png' }}"
+                                 class="serviceimg" alt="{{ r.title|lower }}"></div>
+                        </div>
+                        <div id="servicetitle"><div>{{ r.title }}</div></div>
+                        <div class="{{ state_class }}">{{ state_label }}</div>
+                    </a>
+                {%- else -%}
+                    <div class="servicetilenolink" style="display: block; cursor: default">
+                        <div id="serviceimg">
+                            <div><img id="{{ r.title|lower }}-service-img"
+                                 src="{{ bp }}/icons/{{ (cfg.services | selectattr('title','equalto',r.title) | map(attribute='icon') | first) or 'blank.png' }}"
+                                 class="serviceimg" alt="{{ r.title|lower }}"></div>
+                        </div>
+                        <div id="servicetitlenolink" style="cursor: default"><div>{{ r.title }}</div></div>
+                        <div class="{{ state_class }}">{{ state_label }}</div>
+                    </div>
+                {%- endif -%}
+            {%- endif -%}
+        </div>
+    </div>
+{%- endfor %}
