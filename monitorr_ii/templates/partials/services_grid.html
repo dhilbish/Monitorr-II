@@ -15,10 +15,7 @@
             {%- set svc = (cfg.services | selectattr('title', 'equalto', r.title) | first) if cfg is defined else None -%}
 
             {# Wrap-with-link only if state is up or unresponsive AND we know the link_url #}
-            {%- set link_target = '' -%}
-            {%- for s in cfg.services if cfg is defined and s.title == r.title -%}
-                {%- if s.show_link and s.link_url -%}{% set link_target = s.link_url %}{%- endif -%}
-            {%- endfor -%}
+            {%- set link_target = svc.link_url if (svc and svc.show_link and svc.link_url) else '' -%}
 
             {%- if r.state == "down" -%}
                 <div class="servicetileoffline">
